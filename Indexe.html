@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itinerario en Budapest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #2563eb;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: #dbeafe;
+        }
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 2px solid #e5e7eb;
+            background-color: white;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #4b5563;
+            white-space: nowrap;
+        }
+        .tab.active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: bold;
+        }
+        .activity {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s;
+        }
+        .activity.completed {
+            background-color: #f0fdf4;
+        }
+        .activity h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #1f2937;
+        }
+        .activity p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .activity .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .activity .actions a {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .activity .actions a:hover {
+            background-color: #bfdbfe;
+        }
+        .progress-container {
+            padding: 16px;
+            background-color: #f3f4f6;
+        }
+        .progress-bar {
+            background-color: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 10px;
+        }
+        .progress {
+            background-color: #2563eb;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        .footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mi Itinerario en Budapest</h1>
+            <p>Planifica y sigue tu viaje fácilmente</p>
+        </div>
+        <div class="tabs" id="tabs">
+            <!-- Tabs will be dynamically inserted here -->
+        </div>
+        <div id="activities">
+            <!-- Activities will be dynamically inserted here -->
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Los precios son orientativos y pueden variar.</p>
+        </div>
+    </div>
+
+    <script>
+        // Datos de las actividades
+        const actividades = [
+            {
+                id: 1,
+                dia: "Domingo",
+                hora: "10:00",
+                actividad: "Llegada al aeropuerto de Budapest",
+                lugarDetalles: "Aeropuerto de Budapest",
+                transporte: "Taxi o autobús",
+                ubicacionLink: "https://maps.app.goo.gl/d78XNmHrzE65sWGs8",
+                precio: "Vuelo incluido en tu reserva",
+                completada: false
+            },
+            {
+                id: 2,
+                dia: "Domingo",
+                hora: "11:00",
+                actividad: "Traslado al hotel",
+                lugarDetalles: "Silver Hotel Budapest City Center",
+                transporte: "Taxi: 30-35€, Autobús 100E: 3-4€",
+                ubicacionLink: "https://maps.app.goo.gl/YNPXHZDMxXYgZfZ17",
+                precio: "Taxi: 30-35€, Autobús 100E: 3-4€",
+                completada: false
+            },
+            // Añade más actividades aquí...
+        ];
+
+        // Función para renderizar las pestañas
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            const dias = [...new Set(actividades.map(a => a.dia))];
+            dias.forEach(dia => {
+                const tab = document.createElement('button');
+                tab.className = 'tab';
+                tab.textContent = dia;
+                tab.onclick = () => setActiveTab(dia);
+                tabsContainer.appendChild(tab);
+            });
+            setActiveTab(dias[0]);
+        }
+
+        // Función para establecer la pestaña activa
+        function setActiveTab(dia) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.textContent === dia) {
+                    tab.classList.add('active');
+                }
+            });
+            renderActivities(dia);
+        }
+
+        // Función para renderizar las actividades
+        function renderActivities(dia) {
+            const activitiesContainer = document.getElementById('activities');
+            activitiesContainer.innerHTML = '';
+            const actividadesDia = actividades.filter(a => a.dia === dia);
+            actividadesDia.forEach(act => {
+                const actDiv = document.createElement('div');
+                actDiv.className = `activity ${act.completada ? 'completed' : ''}`;
+                actDiv.innerHTML = `
+                    <h3>${act.actividad}</h3>
+                    <p>${act.lugarDetalles}</p>
+                    <div class="actions">
+                        <a href="${act.ubicacionLink}" target="_blank">📍 Ver ubicación</a>
+                        <span>💰 ${act.precio}</span>
+                    </div>
+                `;
+                actDiv.onclick = () => toggleCompleted(act.id);
+                activitiesContainer.appendChild(actDiv);
+            });
+            updateProgress(actividadesDia);
+        }
+
+        // Función para marcar una actividad como completada
+        function toggleCompleted(id) {
+            const actividad = actividades.find(a => a.id === id);
+            actividad.completada = !actividad.completada;
+            renderActivities(actividad.dia);
+        }
+
+        // Función para actualizar la barra de progreso
+        function updateProgress(actividadesDia) {
+            const total = actividadesDia.length;
+            const completadas = actividadesDia.filter(a => a.completada).length;
+            const progress = (completadas / total) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        // Inicialización
+        renderTabs();
+    </script>
+</body>
+</html>
